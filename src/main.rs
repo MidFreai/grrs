@@ -1,18 +1,28 @@
 use clap::Parser;
-use anyhow::{Context, Result};
+use anyhow::{Context, Error, Result};
 
-#[derive(Parser)]
+
+///grrs -- Simple program for verify patterns in files
+//passando o parser pra pegar a treat parse()
+#[derive(Parser,Debug)]
+#[command(version,about,long_about=None)]
 struct Cli{
+    ///Pattern for search
+    #[arg(short,long)]
     pattern:String,
-    path:std::path::PathBuf,
+
+    ///Path of file
+    #[arg(short,long)]
+    file:std::path::PathBuf,
 }
 
-fn main() -> Result<()>{
+fn main() -> Result<(), Error>{
+    //Cli montado pelo derive parse
     let args = Cli::parse();
 
     //anyhow devolvendo com muito contexto // nem presisa
-    let content = std::fs::read_to_string(&args.path)
-        .with_context(|| format!("could not read file `{}`", args.path.display()))?;
+    let content = std::fs::read_to_string(&args.file)
+        .with_context(|| format!("could not read file `{}`", args.file.display()))?;
 
     for line in content.lines(){
         if line.contains(&args.pattern){
