@@ -1,22 +1,22 @@
-use clap::Parser;
-use anyhow::{Context, Error, Result};
+use clap::{Parser};
+use anyhow::{Context, Result};
 
 
-///grrs -- Simple program for verify patterns in files
+///grrs -- Simple program to verify patterns in files
 //passando o parser pra pegar a treat parse()
 #[derive(Parser,Debug)]
 #[command(version,about,long_about=None)]
 struct Cli{
     ///Pattern for search
-    #[arg(short,long)]
+    //#[arg(short,long)]
     pattern:String,
 
     ///Path of file
-    #[arg(short,long)]
+    //#[arg(short,long)]
     file:std::path::PathBuf,
 }
 
-fn main() -> Result<(), Error>{
+fn main() -> Result<()>{
     //Cli montado pelo derive parse
     let args = Cli::parse();
 
