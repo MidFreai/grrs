@@ -1,5 +1,5 @@
 use clap::{Parser};
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, ensure};
 
 
 ///grrs -- Simple program to verify patterns in files
@@ -24,11 +24,15 @@ fn main() -> Result<()>{
     let content = std::fs::read_to_string(&args.file)
         .with_context(|| format!("could not read file `{}`", args.file.display()))?;
 
+    let mut ifprint = false;
     for line in content.lines(){
         if line.contains(&args.pattern){
             println!("{}",line);
+            ifprint = true;
         }
     }
+
+    ensure!(ifprint, "No lines find");
 
     Ok(())
 }
