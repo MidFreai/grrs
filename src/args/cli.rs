@@ -25,18 +25,35 @@ impl Cli{
         .unwrap_or("".to_string())
     }
     pub fn get_file(&self) -> std::path::PathBuf{
-        self.file
-        .clone()
-        .unwrap()
+        match self.file {
+            Some(_) => {
+                self.file
+                    .clone()
+                    .unwrap()
+            }
+            None => {
+                std::path::PathBuf::new()
+            }
+        }
     }
     pub fn get_command(&self) -> Commando{
-        self.command
-        .clone()
-        .unwrap()
+        match self.command {
+            Some(_) => self.command
+                        .clone()
+                        .unwrap(),
+            None => Commando::None,
+        }
+        
     }
 
     pub fn run_command(&self){
-        todo!()
+        match self.get_command() {
+            Commando::Test => {
+                println!("Teste bem aqui");
+            }
+            Commando::Multi{ref first} => {println!("{first}");}
+            Commando::None => {}
+        }
     }
 }
 
@@ -46,4 +63,5 @@ pub enum Commando {
     Multi{
         first:String
     },
+    None,
 }

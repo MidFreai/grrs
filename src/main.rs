@@ -1,4 +1,4 @@
-use clap::{Parser,Subcommand};
+use clap::{Parser};
 use anyhow::{Context, Result, ensure};
 
 mod args;
@@ -8,12 +8,7 @@ fn main() -> Result<()>{
     //Cli montado pelo derive parse
     let args = Cli::parse();
 
-    match args.get_command() {
-        Commando::Test => {
-            println!("Teste bem aqui");
-        }
-        Commando::Multi{ref first} => {println!("{first}");}
-    }
+    args.run_command();
 
     //anyhow devolvendo com muito contexto // nem presisa
     let content = std::fs::read_to_string(&args.get_file())
