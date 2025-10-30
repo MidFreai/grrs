@@ -1,4 +1,5 @@
 use clap::{Parser,Subcommand};
+use anyhow::{Context, Result, ensure};
 
 
 ///grrs -- Simple program to verify patterns in files
@@ -7,11 +8,9 @@ use clap::{Parser,Subcommand};
 #[command(version,about,long_about=None)]
 pub struct Cli{
     ///Pattern for search
-    //#[arg(short,long)]
     pattern:Option<String>,
 
     ///Path of file
-    //#[arg(short,long)]
     file:Option<std::path::PathBuf>,
 
     #[command(subcommand)]
@@ -54,6 +53,23 @@ impl Cli{
             Commando::Multi{ref first} => {println!("{first}");}
             Commando::None => {}
         }
+    }
+
+    pub fn run(&self) -> Result<(),anyhow::Error>{
+        //anyhow devolvendo com muito contexto // nem presisa
+        let content = std::fs::read_to_string(&self.get_file())
+            .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
+
+        let mut ifprint = false;
+        for line in content.lines(){
+            if line.contains(&self.get_pattern()){
+                println!("  {}",line);
+                ifprint = true;
+            }
+        }
+
+        ensure!(ifprint, "No lines find");
+        Ok(())
     }
 }
 
