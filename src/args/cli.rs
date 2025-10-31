@@ -3,7 +3,6 @@ use anyhow::{Context, Result, ensure, anyhow};
 
 
 ///grrs -- Simple program to verify patterns in files
-//passando o parser pra pegar a treat parse()
 #[derive(Parser,Debug)]
 #[command(version,about,long_about=None)]
 pub struct Cli{
@@ -33,30 +32,42 @@ impl Cli{
     }
 
     pub fn run(&self) -> Result<(),anyhow::Error>{
+        let content = std::fs::read_to_string(&self.get_file())
+            .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
+        let mut ifprint = false;
         match &self.get_command() {
             Ok(Commando::Table) => {
                 println!("Teste bem aqui");
             }
-            Err(_) => {
-                let content = std::fs::read_to_string(&self.get_file())
-                    .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
-                let mut ifprint = false;
+            Ok(Commando::Reverse) => {
                 for line in content.lines(){
-                    if line.contains(&self.get_pattern()){
-                        println!("  {}",line);
+                    if !line.contains(&self.get_pattern()){
+                        println!("{}",line);
                         ifprint = true;
                     }
-                } 
-        
-                ensure!(ifprint, "No lines find");
+                }
+            }
+            Err(_) => {
+                for line in content.lines(){
+                    if line.contains(&self.get_pattern()){
+                        println!("{}",line);
+                        ifprint = true;
+                    }
+                }
             }
         }
-
+        
+        ensure!(ifprint, "No lines find");
         Ok(())
     }
 }
 
 #[derive(Debug,Clone,Subcommand)]
 pub enum Commando {
+    #[command(visible_alias = "t", alias="tab")]
+    ///Print in table format
     Table,
+    #[command(visible_alias = "r", alias="re")]
+    ///Print all lines that do not match the pattern
+    Reverse,
 }
