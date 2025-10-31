@@ -34,14 +34,18 @@ impl Cli{
     pub fn run(&self) -> Result<(),anyhow::Error>{
         let content = std::fs::read_to_string(&self.get_file())
             .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
+        
+        let pattern = &self.get_pattern();
+        
         let mut ifprint = false;
+        
         match &self.get_command() {
             Ok(Commando::Table) => {
                 println!("Teste bem aqui");
             }
             Ok(Commando::Reverse) => {
                 for line in content.lines(){
-                    if !line.contains(&self.get_pattern()){
+                    if !line.contains(pattern){
                         println!("{}",line);
                         ifprint = true;
                     }
@@ -49,7 +53,7 @@ impl Cli{
             }
             Err(_) => {
                 for line in content.lines(){
-                    if line.contains(&self.get_pattern()){
+                    if line.contains(pattern){
                         println!("{}",line);
                         ifprint = true;
                     }
