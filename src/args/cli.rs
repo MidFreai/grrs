@@ -1,5 +1,5 @@
 use clap::{Parser,Subcommand};
-use anyhow::{Context, Result, ensure};
+use anyhow::{Context, Result, ensure, anyhow};
 
 
 ///grrs -- Simple program to verify patterns in files
@@ -8,10 +8,10 @@ use anyhow::{Context, Result, ensure};
 #[command(version,about,long_about=None)]
 pub struct Cli{
     ///Pattern for search
-    pattern:Option<String>,
+    pattern:String,
 
     ///Path of file
-    file:Option<std::path::PathBuf>,
+    file:std::path::PathBuf,
 
     #[command(subcommand)]
     command:Option<Commando>,
@@ -19,65 +19,44 @@ pub struct Cli{
 
 impl Cli{
     pub fn get_pattern(&self) -> String{
-        self.pattern
-        .clone()
-        .unwrap_or("".to_string())
+        self.pattern.clone()
     }
     pub fn get_file(&self) -> std::path::PathBuf{
-        match self.file {
-            Some(_) => {
-                self.file
-                    .clone()
-                    .unwrap()
-            }
-            None => {
-                std::path::PathBuf::new()
-            }
-        }
+        self.file.clone()
     }
-    pub fn get_command(&self) -> Commando{
-        match self.command {
-            Some(_) => self.command
-                        .clone()
-                        .unwrap(),
-            None => Commando::None,
+    pub fn get_command(&self) -> Result<Commando>{
+        match &self.command {
+            Some(comand) => Ok(comand.clone()),
+            None => Err(anyhow!("Nenhum comando encontrado")),
         }
         
     }
 
-    pub fn run_command(&self){
-        match self.get_command() {
-            Commando::Test => {
+    pub fn run(&self) -> Result<(),anyhow::Error>{
+        match &self.get_command() {
+            Ok(Commando::Table) => {
                 println!("Teste bem aqui");
             }
-            Commando::Multi{ref first} => {println!("{first}");}
-            Commando::None => {}
-        }
-    }
-
-    pub fn run(&self) -> Result<(),anyhow::Error>{
-        //anyhow devolvendo com muito contexto // nem presisa
-        let content = std::fs::read_to_string(&self.get_file())
-            .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
-
-        let mut ifprint = false;
-        for line in content.lines(){
-            if line.contains(&self.get_pattern()){
-                println!("  {}",line);
-                ifprint = true;
+            Err(_) => {
+                let content = std::fs::read_to_string(&self.get_file())
+                    .with_context(|| format!("could not read file `{}`", self.get_file().display()))?;
+                let mut ifprint = false;
+                for line in content.lines(){
+                    if line.contains(&self.get_pattern()){
+                        println!("  {}",line);
+                        ifprint = true;
+                    }
+                } 
+        
+                ensure!(ifprint, "No lines find");
             }
         }
 
-        ensure!(ifprint, "No lines find");
         Ok(())
     }
 }
 
 #[derive(Debug,Clone,Subcommand)]
 pub enum Commando {
-    Test,
-    Multi{
-        first:String
-    },
-    None,
+    Table,
 }
