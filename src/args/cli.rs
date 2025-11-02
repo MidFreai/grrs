@@ -43,6 +43,7 @@ impl Cli{
             Ok(Commando::Table) => {
                 println!("Teste bem aqui");
             }
+
             Ok(Commando::Reverse) => {
                 for line in content.lines(){
                     if !line.contains(pattern){
@@ -51,6 +52,7 @@ impl Cli{
                     }
                 }
             }
+
             Err(_) => {
                 for line in content.lines(){
                     if line.contains(pattern){
@@ -71,6 +73,7 @@ pub enum Commando {
     #[command(visible_alias = "t", alias="tab")]
     ///Print in table format
     Table,
+    
     #[command(visible_alias = "r", alias="re")]
     ///Print all lines that do not match the pattern
     Reverse,
