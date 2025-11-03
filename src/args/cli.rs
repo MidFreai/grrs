@@ -1,5 +1,6 @@
 use clap::{Parser,Subcommand};
 use anyhow::{Context, Result, ensure, anyhow};
+use tabled::{Table, Tabled};
 
 
 ///grrs -- Simple program to verify patterns in files
@@ -41,7 +42,15 @@ impl Cli{
         
         match &self.get_command() {
             Ok(Commando::Table) => {
-                println!("Teste bem aqui");
+                let mut file_lines:Vec<String> = vec![];
+                for line in content.lines(){
+                    if line.contains(pattern){
+                        file_lines.push(line.to_string());
+                        ifprint = true;
+                    }
+                }
+                let table = Table::new(file_lines);
+                println!("{}",table);
             }
 
             Ok(Commando::Reverse) => {
@@ -77,4 +86,9 @@ pub enum Commando {
     #[command(visible_alias = "r", alias="re")]
     ///Print all lines that do not match the pattern
     Reverse,
+}
+
+#[derive(Debug,Tabled)]
+struct Line{
+    line:String,
 }
