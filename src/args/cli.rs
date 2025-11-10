@@ -1,7 +1,7 @@
 use clap::{Parser,Subcommand};
 use anyhow::{Context, Result, ensure, anyhow};
 use tabled::{Table, Tabled, 
-    settings::{Color, Remove, Style, object::{Columns, Rows}}
+    settings::{Color, Remove, Style, object::{Columns, Rows}, Modify}
 };
 
 
@@ -47,7 +47,7 @@ impl Cli{
                 let mut file_lines:Vec<Line> = vec![];
                 for line in content.lines(){
                     if line.contains(pattern){
-                        file_lines.push(Line { lines: (line.to_string()) });
+                        file_lines.push(Line { lines: (line.to_string()), color: (false) });
                         ifprint = true;
                     }
                 }
@@ -57,6 +57,29 @@ impl Cli{
                 table.with(Style::modern_rounded());
                 println!("{}",table);
             }
+
+            Ok(Commando::TableAll) => {
+                let mut file_lines:Vec<Line> = vec![];
+                for line in content.lines(){
+                    if line.contains(pattern){
+                        file_lines.push(Line { lines: (line.to_string()), color: (true) });
+                    }
+                    else {
+                        file_lines.push(Line { lines: (line.to_string()), color: (false) });
+                    }
+                }
+                let mut table = Table::new(&file_lines);
+                table.with(Remove::row(Rows::first()));
+                table.with(Remove::column(Columns::one(1)));
+                for i in 0..file_lines.len() {
+                    if file_lines[i].color == true{
+                        table.with(Modify::new(Rows::one(i)).with(Color::FG_GREEN));
+                    }
+                }
+            table.with(Style::modern_rounded());
+            println!("{}",table);
+            ifprint = true;
+        }
 
             Ok(Commando::Reverse) => {
                 for line in content.lines(){
@@ -87,6 +110,9 @@ pub enum Commando {
     #[command(visible_alias = "t", alias="tab")]
     ///Print in table format
     Table,
+
+    #[command(visible_alias = "ta", alias="taball")]
+    TableAll,
     
     #[command(visible_alias = "r", alias="re")]
     ///Print all lines that do not match the pattern
@@ -96,4 +122,5 @@ pub enum Commando {
 #[derive(Debug,Tabled)]
 struct Line{
     lines:String,
+    color:bool,
 }
