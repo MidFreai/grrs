@@ -1,6 +1,8 @@
 use clap::{Parser,Subcommand};
 use anyhow::{Context, Result, ensure, anyhow};
-use tabled::{Table, Tabled};
+use tabled::{Table, Tabled, 
+    settings::{Color, Remove, Style, object::{Columns, Rows}}
+};
 
 
 ///grrs -- Simple program to verify patterns in files
@@ -42,14 +44,17 @@ impl Cli{
         
         match &self.get_command() {
             Ok(Commando::Table) => {
-                let mut file_lines:Vec<String> = vec![];
+                let mut file_lines:Vec<Line> = vec![];
                 for line in content.lines(){
                     if line.contains(pattern){
-                        file_lines.push(line.to_string());
+                        file_lines.push(Line { lines: (line.to_string()) });
                         ifprint = true;
                     }
                 }
-                let table = Table::new(file_lines);
+                let mut table = Table::new(file_lines);
+                table.with(Remove::row(Rows::first()));
+                table.modify(Columns::first(), Color::FG_GREEN);
+                table.with(Style::modern_rounded());
                 println!("{}",table);
             }
 
@@ -90,5 +95,5 @@ pub enum Commando {
 
 #[derive(Debug,Tabled)]
 struct Line{
-    line:String,
+    lines:String,
 }
