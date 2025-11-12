@@ -12,6 +12,7 @@ Arguments:
 
 Commands: 
     table: Print in table format
+    tableall: Print all lines in table format
     reverse: Print all lines that do not match the pattern
 ```
 
